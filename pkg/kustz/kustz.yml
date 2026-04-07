@@ -52,6 +52,35 @@ service:
 #       - edns0
 #   policy: None
 
+# affinity 亲和性配置
+### Pod 反亲和：将 Pod 打散到不同节点
+# affinity:
+#   podAntiAffinity:
+#     requiredDuringSchedulingIgnoredDuringExecution:
+#       - labelSelector:
+#           matchLabels:
+#             app: my-app
+#         topologyKey: kubernetes.io/hostname
+
+### 节点亲和：调度到特定节点
+# affinity:
+#   nodeAffinity:
+#     requiredDuringSchedulingIgnoredDuringExecution:
+#       nodeSelectorTerms:
+#         - matchExpressions:
+#             - key: node-group
+#               operator: In
+#               values:
+#                 - group-a
+
+# outputs 配置控制输出哪些资源
+# 默认输出: Deployment, Service
+# 如果配置了 outputs，则严格按照配置输出
+# outputs:
+#   ingress: false    # 不输出 Ingress (即使有 rules)
+#   configmaps: false # 不输出 ConfigMap (即使有配置)
+#   secrets: false    # 不输出 Secret (即使有配置)
+
 ingress:
   annotations:
     k1: v1

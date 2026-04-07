@@ -8,11 +8,20 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-// ProbeHandler action
+// ProbeHandler 将探针动作字符串转换为 K8s ProbeHandler
 //
-// http(s)://:8080/healthy
-// tcp://:8080
-// cat /tmp/healthy
+// 动作类型识别:
+//
+//	http:// 或 https:// 开头: HTTP GET 请求检查
+//	tcp:// 开头: TCP 套接字连接检查
+//	其他: 命令执行检查 (ExecAction)
+//
+//	示例:
+//
+//	http://:8080/healthy      -> HTTPGet 检查 /healthy 路径
+//	https://:443/ready       -> HTTPSGet 检查 /ready 路径
+//	tcp://:3306              -> TCPSocket 检查 3306 端口
+//	cat /tmp/healthy         -> Exec 执行命令
 func ProbeHandler(action string, headers map[string]string) corev1.ProbeHandler {
 	if strings.HasPrefix(action, "tcp://") {
 		return toTCPProbeHandler(action)
@@ -25,6 +34,16 @@ func ProbeHandler(action string, headers map[string]string) corev1.ProbeHandler 
 	return toExecProbeHandler(action)
 }
 
+// toHTTPProbeHandler 构建 HTTP GET 探针处理器
+//
+//	URL 解析:
+//
+//	  http://host:port/path
+//
+//	其中:
+//	  - host: 检查时访问的主机 (空则使用 Pod IP)
+//	  - port: 检查的端口号
+//	  - path: HTTP 请求路径
 func toHTTPProbeHandler(action string, headers map[string]string) corev1.ProbeHandler {
 
 	ur, err := url.Parse(action)
@@ -47,6 +66,7 @@ func toHTTPProbeHandler(action string, headers map[string]string) corev1.ProbeHa
 	return handler
 }
 
+// toHTTPHeaders 将 map 转换为 HTTP 头部切片
 func toHTTPHeaders(headers map[string]string) []corev1.HTTPHeader {
 	if len(headers) == 0 {
 		return nil
@@ -62,6 +82,11 @@ func toHTTPHeaders(headers map[string]string) []corev1.HTTPHeader {
 	return hh
 }
 
+// toTCPProbeHandler 构建 TCP 套接字探针处理器
+//
+//	URL 解析:
+//
+//	  tcp://host:port
 func toTCPProbeHandler(action string) corev1.ProbeHandler {
 	ur, err := url.Parse(action)
 	if err != nil {
@@ -78,6 +103,10 @@ func toTCPProbeHandler(action string) corev1.ProbeHandler {
 	return handler
 }
 
+// toExecProbeHandler 构建命令执行探针处理器
+//
+//	命令格式: 命令和参数以空格分隔
+//	示例: "cat /tmp/healthy" -> Command: ["cat", "/tmp/healthy"]
 func toExecProbeHandler(action string) corev1.ProbeHandler {
 	return corev1.ProbeHandler{
 		Exec: &corev1.ExecAction{

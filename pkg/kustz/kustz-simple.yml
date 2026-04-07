@@ -1,0 +1,27 @@
+apiVersion: kustz/v1
+
+namespace: demo
+name: my-app
+
+service:
+  name: my-app
+  image: my-app:latest
+  replicas: 2
+  resources:
+    cpu: 100m/200m
+    memory: 128Mi/256Mi
+
+# Pod 反亲和：将 Pod 打散到不同节点
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchLabels:
+            app: my-app
+        topologyKey: kubernetes.io/hostname
+
+# 只输出 Deployment 和 Service
+outputs:
+  ingress: false
+  configmaps: false
+  secrets: false

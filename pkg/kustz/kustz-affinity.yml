@@ -1,0 +1,23 @@
+apiVersion: kustz/v1
+
+namespace: demo-demo
+name: srv-webapp-demo
+
+service:
+  name: nginx
+  image: docker.io/library/nginx:alpine
+  replicas: 2
+  ports:
+    - "80:8080"
+  resources:
+    cpu: 10m/20m
+    memory: 10Mi/20Mi
+
+# Pod 反亲和配置：将 Pod 打散到不同节点
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchLabels:
+            app: srv-webapp-demo
+        topologyKey: kubernetes.io/hostname

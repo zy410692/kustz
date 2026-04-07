@@ -1,0 +1,29 @@
+apiVersion: kustz/v1
+
+namespace: demo-demo
+name: srv-webapp-demo
+
+service:
+  name: nginx
+  image: docker.io/library/nginx:alpine
+  replicas: 2
+  ports:
+    - "80:8080"
+
+# outputs 配置: 只输出 Deployment 和 Service
+outputs:
+  ingress: false
+  configmaps: false
+  secrets: false
+
+# 仍然配置 ingress rules，但不会输出
+ingress:
+  rules:
+    - http://api.example.com/ping
+
+# 仍然配置 configmaps，但不会输出
+configmaps:
+  envs:
+    - name: test-configmap
+      files:
+        - configmap.env

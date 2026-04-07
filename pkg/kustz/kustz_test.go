@@ -40,6 +40,24 @@ func Test_KustzKustomize(t *testing.T) {
 	output(kust)
 }
 
+func Test_KustzDeploymentWithAffinity(t *testing.T) {
+	kz2 := NewKustzFromConfig("./kustz-affinity.yml")
+	dep := kz2.KubeDeployment()
+	output(dep)
+}
+
+func Test_KustzServiceDefaultPort(t *testing.T) {
+	kz2 := NewKustzFromConfig("./kustz-simple.yml")
+	svc := kz2.KubeService()
+	output(svc)
+}
+
+func Test_KustzKustomizeSimple(t *testing.T) {
+	kz2 := NewKustzFromConfig("./kustz-simple.yml")
+	kust := kz2.Kustomization()
+	output(kust)
+}
+
 func output(v any) {
 	b, err := kubeutils.YamlSigMarshal(v)
 
